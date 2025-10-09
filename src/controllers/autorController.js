@@ -2,18 +2,17 @@ import { autor } from "../models/Autor.js";
 
 class autorController {
 
-    static async listarAutores(req, res) {
+    static listarAutores = async (req, res,next) => {
         try {
-            const listaAutores = await autor.find();
-            res.status(200).json(listaAutores);
-        } catch (erro) {
-            res.status(500).json({
-                message: `${erro.message} - falha ao listar os autores`
-            });
-        }
-    }
+            const autoresResultado = await autor.find();
 
-    static async cadastrarAutor(req, res) {
+            res.status(200).json(autoresResultado);
+        } catch (erro) {
+            next(erro);
+        }
+    };
+
+    static cadastrarAutor = async (req, res, next) => {
         try {
             const novoAutor = await autor.create({
                 nome: req.body.nome,
@@ -25,25 +24,28 @@ class autorController {
 
             });
         } catch (erro) {
-            res.status(500).json({
-                message: `${erro.message} - falha ao cadastrar o autor`
-            });
+            next(erro);
         }
     }
 
-    static async pegarAutorPorId(req, res) {
+    static pegarAutorPorId = async (req, res, next) => {
         try {
             const id = req.params.id;
             const autorEncontrado = await autor.findById(id);
-            res.status(200).json(autorEncontrado);
+
+            if (autorEncontrado !== null) {
+                res.status(200).json(autorEncontrado);
+            } else {
+                res.status(404).json({
+                    message: "Id do autor nao encontrado"
+                });
+            }
+
         } catch (erro) {
-            res.status(500).json({
-                message: `${erro.message} - falha ao pegar o autor`
-            });
+            next(erro);
         }
     }
-
-    static async atualizarAutorPorID(req, res) {
+    static atualizarAutorPorID = async (req, res,next) => {
         try {
             const id = req.params.id;
             await autor.findByIdAndUpdate(id, req.body);
@@ -51,13 +53,11 @@ class autorController {
                 message: "autor atualizado com sucesso"
             });
         } catch (erro) {
-            res.status(500).json({
-                message: `${erro.message} - falha ao atualizar o autor`
-            });
+            next(erro);
         }
     }
 
-    static async DeletarAutorPorID(req, res) {
+    static DeletarAutorPorID = async (req, res,next) => {
         try {
             const id = req.params.id;
             await autor.findByIdAndDelete(id);
@@ -65,9 +65,7 @@ class autorController {
                 message: "autor deletado com sucesso"
             });
         } catch (erro) {
-            res.status(500).json({
-                message: `${erro.message} - falha ao deletar o autor`
-            });
+            next(erro);
         }
     }
 
